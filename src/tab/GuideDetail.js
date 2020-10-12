@@ -28,30 +28,27 @@ export class GuideDetail extends React.Component {
       end: 6,
       switchValue: false,
       text: '',
+      id: ['jj', 'hh'],
     };
   }
   componentDidMount() {
     const {text} = this.props.route.params;
     this.setState({text: text});
     this.setState({isLoading: true}, this.getData);
+    this.setState({id: this.state.data[0]});
   }
   componentWillUnmount() {
     this._isMounted = false;
   }
-  toggleSwitch = (value) => {
+  setid = (value) => {
     //onValueChange of the switch this function will be called
-    this.setState({switchValue: value});
+    this.setState({id: value});
     //state changes according to switch
     //which will result in re-render the text
   };
   getData = async () => {
     const url =
-      'http://localhost:8888/api/guide_api.php?start=' +
-      this.state.start +
-      '&end=' +
-      this.state.end +
-      '&text=' +
-      this.state.text;
+      'http://localhost:8888/api/guide_api.php?text=' + this.state.text;
     fetch(url)
       .then((response) => response.json())
       .then((responseJson) => {
@@ -98,9 +95,10 @@ export class GuideDetail extends React.Component {
   };
 
   handleLoadMore = () => {
-    this.setState({start: this.state.start + 6}, this.getData);
+    this.setState({start: this.state.start + 6}, this.getData2);
   };
   render() {
+    const id = this.state.id;
     return (
       <SafeAreaView style={{flex: 1}}>
         <CustomHeader
@@ -111,17 +109,26 @@ export class GuideDetail extends React.Component {
         <View style={{justifyContent: 'center', alignItems: 'center'}}>
           <Text
             style={{
+              fontSize: 17,
               alignSelf: 'center',
               marginTop: 10,
+              marginLeft: 10,
+              marginRight: 10,
+              backgroundColor: 'white',
             }}>
-            {this.state.text}
+            {this.state.data.map((data) => (
+              <Text>{data.treatment}</Text>
+            ))}
+            {this.state.id.map((id) => (
+              <Text>{id}</Text>
+            ))}
           </Text>
           <Text
             style={{
               alignSelf: 'center',
               marginTop: 10,
             }}>
-            ผลิตภัณฑ์แนะนำสำหรับคุณ
+            ผลิตภัณฑ์แนะนำสำหรับคุณ {id.text}
           </Text>
         </View>
         <FlatList
