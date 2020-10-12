@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   Image,
   TouchableOpacity,
+  TouchableHighlight,
   ScrollView,
   StyleSheet,
   FlatList,
@@ -23,42 +24,53 @@ export class GuideDetail extends React.Component {
     super(props);
     this.state = {
       isLoading: false,
+      isPress:true,
       data: [],
       start: 0,
       end: 6,
-      switchValue: false,
+      recommendItems: [],
       text: '',
-      id: ['jj', 'hh'],
+      name: '',
+      id: ''
     };
   }
   componentDidMount() {
     const {text} = this.props.route.params;
     this.setState({text: text});
     this.setState({isLoading: true}, this.getData);
-    this.setState({id: this.state.data[0]});
   }
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-  setid = (value) => {
-    //onValueChange of the switch this function will be called
-    this.setState({id: value});
-    //state changes according to switch
-    //which will result in re-render the text
-  };
+  
+
   getData = async () => {
     const url =
-      'http://localhost:8888/api/guide_api.php?text=' + this.state.text;
+      'http://172.20.10.3/api/guide_api.php?text=' + this.state.text;
     fetch(url)
       .then((response) => response.json())
       .then((responseJson) => {
         this.setState({
-          data: this.state.data.concat(responseJson),
-          isLoading: false,
+          data: responseJson,
+        });
+        this.setState({
+          id: this.state.data[0][0]
         });
       });
   };
+  getRecommendData = async () => {
+    const problemId = this.state.id;
+    const url = 'http://172.20.10.3/api/recommend_api.php?id='+problemId+'&start='+this.state.start+'&end='+this.state.end;
+    fetch(url)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({
+          recommendItems: this.state.recommendItems.concat(responseJson),
+          isLoading: false,
+          isPress: false,
+        });
+      });
+  };
+
   renderRow = ({item}) => {
+
     return (
       <View style={styles.product_card}>
         <TouchableOpacity
@@ -95,15 +107,13 @@ export class GuideDetail extends React.Component {
   };
 
   handleLoadMore = () => {
-    this.setState({start: this.state.start + 6}, this.getData2);
+    this.setState({start: this.state.start + 6}, this.getRecommendData);
   };
   render() {
-    const id = this.state.id;
     return (
       <SafeAreaView style={{flex: 1}}>
         <CustomHeader
-          title="Home"
-          isHome={true}
+          title="Guide"
           navigation={this.props.navigation}
         />
         <View style={{justifyContent: 'center', alignItems: 'center'}}>
@@ -116,28 +126,30 @@ export class GuideDetail extends React.Component {
               marginRight: 10,
               backgroundColor: 'white',
             }}>
-            {this.state.data.map((data) => (
-              <Text>{data.treatment}</Text>
+            {this.state.data.map((data,index) => (
+              <Text key={index} >{data.treatment}</Text>
             ))}
-            {this.state.id.map((id) => (
-              <Text>{id}</Text>
-            ))}
-          </Text>
-          <Text
-            style={{
-              alignSelf: 'center',
-              marginTop: 10,
-            }}>
-            ผลิตภัณฑ์แนะนำสำหรับคุณ {id.text}
           </Text>
         </View>
+        { this.state.isPress ?<TouchableHighlight
+          onPress={() =>
+            this.getRecommendData()
+          }
+          style={{alignSelf:'center',marginTop:10}}
+          onLongPress={this._onLongPressButton}
+          underlayColor="white">
+          <View style={styles.button2}>
+              <Text style={styles.buttonText}>แสดงสินค้าที่ทางไกด์แนะนำ</Text>
+          </View>
+        </TouchableHighlight>: null }
+        
         <FlatList
           style={styles.container}
-          data={this.state.data}
+          data={this.state.recommendItems}
           keyExtractor={(item, index) => index.toString}
           renderItem={this.renderRow}
-          onEndReached={this.handleLoadMore}
           numColumns={2}
+          onEndReached={this.handleLoadMore}
           // onEndReachedThreshold={0}
           // ListFooterComponent = {this.renderFooter}
         />
@@ -176,5 +188,14 @@ const styles = StyleSheet.create({
   loader: {
     marginTop: 10,
     alignItems: 'center',
+  },
+  button2: {
+    width: "60%",
+    height: 25,
+    alignItems: 'center',
+    borderColor: 'white',
+    borderWidth:1,
+    borderStyle:'solid',
+    backgroundColor: '#b2c4c8',
   },
 });
