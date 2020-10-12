@@ -49,7 +49,7 @@ export class HomeScreen extends React.Component {
   };
   getData = async () => {
     const url =
-      'http://172.20.10.3/api/select_api.php?start=' +
+      'http://localhost:8888/api/select_api.php?start=' +
       this.state.start +
       '&end=' +
       this.state.end;

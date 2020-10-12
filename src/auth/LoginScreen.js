@@ -70,7 +70,7 @@ export class LoginScreen extends Component {
   login = () => {
     this.setState({ActivityIndicator_Loading: true}, () => {
       fetch(
-        'http://172.20.10.3/api/login_api.php?username=' +
+        'http://localhost:8888/api/login_api.php?username=' +
           this.state.username +
           '&password=' +
           this.state.password,

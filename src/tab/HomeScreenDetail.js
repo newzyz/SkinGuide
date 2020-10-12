@@ -31,6 +31,8 @@ export class HomeScreenDetail extends Component {
       ],
       id: '',
       data: [],
+      name: '',
+      price: '',
     };
   }
 
@@ -38,15 +40,27 @@ export class HomeScreenDetail extends Component {
     const {itemId} = this.props.route.params;
     this.setState({id: itemId}, this.getData);
   }
+  _onPressButton() {
+    const url =
+      'http://localhost:8888/api/insert_to_basket.php?id=' + this.state.id;
+    fetch(url)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        alert(responseJson);
+      });
+  }
 
   getData = async () => {
-    const url = 'http://172.20.10.3/api/selectOne_api.php?id=' + this.state.id;
+    const url =
+      'http://localhost:8888/api/selectOne_api.php?id=' + this.state.id;
     fetch(url)
       .then((response) => response.json())
       .then((responseJson) => {
         this.setState({
           data: this.state.data.concat(responseJson),
         });
+        this.setState({name: this.state.data[0]['product_name']});
+        this.setState({price: this.state.data[0]['price']});
       });
   };
 
@@ -142,9 +156,7 @@ export class HomeScreenDetail extends Component {
               }}>
               <SafeAreaView>
                 <TouchableHighlight
-                  onPress={() =>
-                    this._onPressButton(this.state.email, this.state.password)
-                  }
+                  onPress={() => this._onPressButton()}
                   onLongPress={this._onLongPressButton}
                   underlayColor="white">
                   <View style={styles.button2}>
